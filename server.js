@@ -21,7 +21,7 @@ function saveUsers(users) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
 }
 
-// 📥 POST: Benutzer registrieren
+//  POST: Benutzer registrieren
 app.post('/signup', (req, res) => {
   const { name, SurName, DateOfBirth, phone } = req.body;
 
@@ -109,13 +109,13 @@ app.post('/verify', (req, res) => {
 
 });
 
-// 📤 GET: Alle Benutzer anzeigen
+//  GET: Alle Benutzer anzeigen
 app.get('/users', (req, res) => {
   const users = loadUsers();
   res.json(users);
 });
 
-// 🚀 Server starten
+//  Server starten
 app.listen(3000, () => {
   console.log('✅ Server läuft auf http://localhost:3000');
 });
