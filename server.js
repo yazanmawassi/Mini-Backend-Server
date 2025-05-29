@@ -57,13 +57,16 @@ app.post('/login',(req, res) =>{
 
   // Code generieren (6-stellig)
   const code = Math.floor(100000 + Math.random() * 900000);
-
+  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 Minuten in ms
   // Code speichern (temporär)
   users[userIndex].loginCode = code;
 
+  // code time speichern
+  users[userIndex].expiresAt = expiresAt;    
+
   // In Datei speichern
   saveUsers(users);
-
+  
   // Code zurückgeben (später: per SMS oder E-Mail!)
   res.send(`✅ Login-Code für ${phone} ist ${code}`);
 });
@@ -86,13 +89,26 @@ app.post('/verify', (req, res) => {
   if (user.loginCode != code) {
     return res.status(401).send("❌ Ungültiger Code.");
   }
-  // ✅ Erfolgreich verifiziert → Code löschen
-  delete user.loginCode;
-  saveUsers(users);
+  // zusätzliche Absicherung(prueft ob ein code gibt)
+  if (!user.loginCode || !user.expiresAt) {
+    return res.status(400).send("❌ Kein aktiver Login-Code vorhanden.");
+  }
 
+  // Ablaufzeit prüfen
+  if (Date.now() > user.expiresAt) {
+   delete user.loginCode;
+   delete user.expiresAt;
+   saveUsers(users);
+  return res.status(410).send("❌ Code ist abgelaufen. Bitte erneut einloggen.");
+  }
+  // ✅ Erfolgreich verifiziert → Code und Laufyeit löschen
+  delete user.loginCode;
+  delete user.expiresAt;
+  saveUsers(users);
   res.send(`✅ Willkommen zurück, ${user.name}!`);
 
 });
+
 // 📤 GET: Alle Benutzer anzeigen
 app.get('/users', (req, res) => {
   const users = loadUsers();
