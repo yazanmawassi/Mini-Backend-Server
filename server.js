@@ -1,33 +1,54 @@
-
-const fs = require('fs'); // Importiert das eingebaute File-System-Modul 
-
 const express = require('express');
+const fs = require('fs');
+const app = express();
 
-const app = express(); // diese zeile ist funktionaufruf ,diese funktion erstellt eine neue Express-App(webserver)
+app.use(express.json());
 
-app.use(express.json());// verstehe und lese sie automatisch.(wenn daten von client geschickt werden)
+const DATA_FILE = 'users.json';
 
-const Users=[]; //Array um Data zu speichern
-
-// GET-Route erstellen
-
-app.get('/Users',(req,res)=>{res.json(Users)}); // die gespeicherte Daten an den User schicken
-
-//POST-Route erstellen
-
-app.post('/signup',(req,res)=>{
-  const{ name,SurName, DateOfBirth, phone } = req.body; // da werden die User Daten gespeichert
-
-  // prüfen, ob req.body vollständig ist
-  if (!name || !SurName || !DateOfBirth || !phone) {
-    return res.status(400).send("Bitte alle Felder ausfüllen.");
+// Hilfsfunktion: Datei lesen oder leeres Array zurückgeben
+function loadUsers() {
+  if (fs.existsSync(DATA_FILE)) {
+    const data = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(data);
+  } else {
+    return [];
   }
-  Users.push(req.body);
-  res.send(`Willkommen ${name}, deine Nummer ist ${phone}`);
+}
+
+// Hilfsfunktion: Benutzer in Datei schreiben
+function saveUsers(users) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
+}
+
+// 📥 POST: Benutzer registrieren
+app.post('/signup', (req, res) => {
+  const { name, SurName, DateOfBirth, phone } = req.body;
+
+  // Überprüfen, ob alle Felder da sind
+  if (!name || !SurName || !DateOfBirth || !phone) {
+    return res.status(400).send("❌ Bitte alle Felder ausfüllen.");
+  }
+
+  // Bestehende Benutzer laden
+  const users = loadUsers();
+
+  // Neuen Benutzer hinzufügen
+  users.push(req.body);
+
+  // Datei speichern
+  saveUsers(users);
+
+  res.send(`✅ Willkommen ${name}, deine Nummer ist ${phone}`);
 });
 
-// server starten 
-app.listen(3000,()=>{
- console.log('server leuft')
+// 📤 GET: Alle Benutzer anzeigen
+app.get('/users', (req, res) => {
+  const users = loadUsers();
+  res.json(users);
 });
 
+// 🚀 Server starten
+app.listen(3000, () => {
+  console.log('✅ Server läuft auf http://localhost:3000');
+});
