@@ -23,7 +23,7 @@ function saveUsers(users) {
 
 //  POST: Benutzer registrieren
 app.post('/signup', (req, res) => {
-  const { name, SurName, DateOfBirth, phone } = req.body;
+  const { name, SurName, DateOfBirth, phone} = req.body;
 
   // Überprüfen, ob alle Felder da sind
   if (!name || !SurName || !DateOfBirth || !phone) {
@@ -31,14 +31,21 @@ app.post('/signup', (req, res) => {
   }
 
   // Bestehende Benutzer laden
-  const users = loadUsers();
+   const users = loadUsers();
 
+  // neue felder def.
+  const newUser = {
+   name,
+   SurName,
+   DateOfBirth,
+   phone,
+   locked: false,
+   attempts: 0
+  };
   // Neuen Benutzer hinzufügen
-  users.push(req.body);
-
+   users.push(newUser);
   // Datei speichern
-  saveUsers(users);
-
+   saveUsers(users);
   res.send(`✅ Willkommen ${name}, deine Nummer ist ${phone}`);
 });
 
@@ -97,8 +104,7 @@ app.post('/verify', (req, res) => {
   }
   //vergleiche zwischen codes
   if (user.loginCode != code) {
-    // hier wird ein neuw feld def.
-    user.attempts = (user.attempts || 0) + 1;
+    user.attempts = + 1; // counter um 1 erhoehen 
 
     if (user.attempts>3){
        delete user.loginCode;
