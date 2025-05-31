@@ -54,7 +54,8 @@ app.post('/login',(req, res) =>{
   if (userIndex === -1) {
     return res.status(404).send("❌ Diese Telefonnummer ist nicht registriert.");
   }
-     // fuer gesperrte Konten
+  const user = users[userIndex];
+     // Ueberprueft ob der konto gesperrt ist
   if (user.locked) {
      return res.status(403).send("❌ Dieses Konto ist gesperrt.");
   }
@@ -89,6 +90,10 @@ app.post('/verify', (req, res) => {
   // Nutzer suchen
   if (!user) {
     return res.status(404).send("❌ Benutzer nicht gefunden.");
+  }
+  // Ueberprueft ob der konto gesperrt ist
+  if (user.locked) {
+    return res.status(403).send("❌ Dieses Konto ist gesperrt.");
   }
   //vergleiche zwischen codes
   if (user.loginCode != code) {
