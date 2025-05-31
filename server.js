@@ -54,6 +54,11 @@ app.post('/login',(req, res) =>{
   if (userIndex === -1) {
     return res.status(404).send("❌ Diese Telefonnummer ist nicht registriert.");
   }
+     // fuer gesperrte Konten
+  if (user.locked) {
+     return res.status(403).send("❌ Dieses Konto ist gesperrt.");
+  }
+
 
   // Code generieren (6-stellig)
   const code = Math.floor(100000 + Math.random() * 900000);
@@ -85,8 +90,18 @@ app.post('/verify', (req, res) => {
   if (!user) {
     return res.status(404).send("❌ Benutzer nicht gefunden.");
   }
-  //vergleiche ywischen codes
+  //vergleiche zwischen codes
   if (user.loginCode != code) {
+    // hier wird ein neuw feld def.
+    user.attempts = (user.attempts || 0) + 1;
+
+    if (user.attempts>3){
+       delete user.loginCode;
+       delete user.expiresAt;
+       user.locked = true;
+       saveUsers(users);
+      return res.status(403).send("❌ Zu viele ungültige Versuche. Konto gesperrt.");
+    }
     return res.status(401).send("❌ Ungültiger Code.");
   }
   // zusätzliche Absicherung(prueft ob ein code gibt)
