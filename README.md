@@ -1,6 +1,21 @@
-# 📦 Login & Verification Feature
-This app includes a basic login system using phone numbers. When a user enters their phone number, the server sends back a 6-digit code (just like in real apps). The user can then enter that code to complete the login.
+# Simple User Authentication API
 
-All user data is saved in a simple users.json file — no database needed for now.
-It’s perfect for testing, small apps, or learning how backend systems work.
+This is a basic Node.js and Express-based server for managing user signup, login via OTP (one-time password), and verification, using a JSON file as data storage.
 
+##  Features
+
+- User registration (`/signup`)
+- Login with OTP code (`/login`)
+- OTP verification (`/verify`)
+- User blocking after 3 failed login attempts
+- User listing (`/users`)
+- All data is saved in `users.json`
+
+##  Setup
+
+1. Clone the repository or copy the files.
+2. Make sure Node.js is installed.
+3. Install dependencies:
+
+   ```bash
+   npm install express
