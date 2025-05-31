@@ -104,8 +104,7 @@ app.post('/verify', (req, res) => {
   }
   //vergleiche zwischen codes
   if (user.loginCode != code) {
-    user.attempts = + 1; // counter um 1 erhoehen 
-
+     user.attempts = (user.attempts || 0) + 1; // counter um 1 erhoehen 
     if (user.attempts>3){
        delete user.loginCode;
        delete user.expiresAt;
@@ -113,6 +112,7 @@ app.post('/verify', (req, res) => {
        saveUsers(users);
       return res.status(403).send("❌ Zu viele ungültige Versuche. Konto gesperrt.");
     }
+    saveUsers(users);
     return res.status(401).send("❌ Ungültiger Code.");
   }
   // zusätzliche Absicherung(prueft ob ein code gibt)
