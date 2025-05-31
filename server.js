@@ -25,13 +25,23 @@ function saveUsers(users) {
 app.post('/signup', (req, res) => {
   const { name, SurName, DateOfBirth, phone} = req.body;
 
-  // Überprüfen, ob alle Felder da sind
+  // Ueberprüfen, ob alle Felder da sind
   if (!name || !SurName || !DateOfBirth || !phone) {
     return res.status(400).send("❌ Bitte alle Felder ausfüllen.");
+  }
+  // Ueberprüfen, ob telephonnummer richtig ist
+  if (typeof phone !== 'string' || phone.trim().length < 6) {
+    return res.status(400).send("❌ Telefonnummer ist ungültig.");
   }
 
   // Bestehende Benutzer laden
    const users = loadUsers();
+
+   // Doppelte Registrierung verhindern
+  const exists = users.some(u => u.phone === phone);
+  if (exists) {
+    return res.status(409).send("❌ Telefonnummer ist bereits registriert.");
+  }
 
   // neue felder def.
   const newUser = {
@@ -42,7 +52,7 @@ app.post('/signup', (req, res) => {
    locked: false,
    attempts: 0
   };
-  // Neuen Benutzer hinzufügen
+  // Neuen Benutzer hinzufuegen
    users.push(newUser);
   // Datei speichern
    saveUsers(users);
@@ -52,8 +62,9 @@ app.post('/signup', (req, res) => {
 //  POST: Benutzer Login 
 app.post('/login',(req, res) =>{
   const { phone } = req.body;  
-  if (!phone) {
-    return res.status(400).send("❌ Telefonnummer fehlt.");
+  // Manuelle Validierung
+  if (!phone || typeof phone !== 'string' || phone.trim().length < 6) {
+    return res.status(400).send("❌ Bitte eine gültige Telefonnummer mit mindestens 6 Zeichen angeben.");
   }
   let users = loadUsers();
   // Nutzer suchen
@@ -66,7 +77,6 @@ app.post('/login',(req, res) =>{
   if (user.locked) {
      return res.status(403).send("❌ Dieses Konto ist gesperrt.");
   }
-
 
   // Code generieren (6-stellig)
   const code = Math.floor(100000 + Math.random() * 900000);
@@ -130,6 +140,7 @@ app.post('/verify', (req, res) => {
   // ✅ Erfolgreich verifiziert → Code und Laufyeit löschen
   delete user.loginCode;
   delete user.expiresAt;
+  user.attempts = 0; // Reset den Login_code bei Erfolg
   saveUsers(users);
   res.send(`✅ Willkommen zurück, ${user.name}!`);
 
