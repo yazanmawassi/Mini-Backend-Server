@@ -26,7 +26,7 @@ app.post('/signup', (req, res) => {
   const { name, SurName, DateOfBirth, phone} = req.body;
 
   // Ueberprüfen, ob alle Felder da sind
-  if (!name || !SurName || !DateOfBirth || !phone) {
+  if (!name || !SurName || !DateOfBirth || !phone ) {
     return res.status(400).send("❌ Bitte alle Felder ausfüllen.");
   }
   // Ueberprüfen, ob telephonnummer richtig ist
